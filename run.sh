@@ -13,15 +13,20 @@ fi
 
 run_name=""
 docker_name=""
+dir=""
 
 . ./ffmpeg.sh
 
 if [ "$1" = "ffmpeg" ] 
 then
     rm_docker $run_name
+
     run_name=ffmpeg_demo
     docker_name=jrottenberg/ffmpeg
+    dir=/home/code/docker
+
     docker run -it \
+        -v $dir:$dir \
         --name ${run_name} \
         ${docker_name}:latest split_video
     exit 0
