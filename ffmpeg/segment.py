@@ -89,8 +89,15 @@ def slice_media(from_path, media_name, media_type):
         output = str(stdout.decode('utf-8'))
         error = str(stderr.decode('utf-8'))
         # 打印输出结果
-        print(f'Output for run {i}: {output}')
-        print(f'Error for run {i}: {error}')
+        output_log = f'Output for run {i}: {output}'
+        output_error = f'Error for run {i}: {error}'
+        print(output_log)
+        print(output_error)
+        # 打开文件并以追加模式写入内容
+        with open('output.log', 'a') as f:
+            print(output_log, file=f)
+        with open('error.log', 'a') as f:
+            print(output_error, file=f)
 
 
 for i in range(len(media_from_dir_filename)):
