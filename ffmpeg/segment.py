@@ -3,6 +3,12 @@ import math
 import subprocess
 
 
+def print_list(l):
+    print('len: ', len(l))
+    for i in l:
+        print(i)
+
+
 all_filename = []
 
 
@@ -31,16 +37,33 @@ print(f'media_from_dir {media_from_dir}')
 print(f'media_target_dir {media_target_dir}')
 
 media_from_dir_files = list_all_files(media_from_dir)
-media_from_dir_files = [v[:v.rfind(".")] for v in media_from_dir_files]
+# 文件路径
+media_from_dir_path = [
+    v[:v.rfind("/") + 1] for v in media_from_dir_files]
+# 不带路径不带文件类型 只有文件名
+media_from_dir_filename = [v[v.rfind("/") + 1:v.rfind(".")]
+                           for v in media_from_dir_files]
 
-print(f'files: {media_from_dir_files}, len: {len(media_from_dir_files)}')
+
+print('>>> media_from_dir_files')
+print_list(media_from_dir_files)
+
+print('>>> media_from_dir_path')
+print_list(media_from_dir_path)
+
+print('>>> media_from_dir_filename')
+print_list(media_from_dir_filename)
+
 
 duration_time = 120
 
 
-def slice_media(media_name, media_type):
+def slice_media(from_path, media_name, media_type):
+    src_file = f'{from_path}{media_name}{media_type}'
+
+    # 视频时长
     cmd = f"ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 \
-        {media_name}{media_type}"
+        {src_file}"
     obj = os.popen(cmd)
     res = obj.read()
     media_len = math.ceil(float(res))
@@ -53,7 +76,7 @@ def slice_media(media_name, media_type):
         start_time = i
         end_time = i + duration_time
         output_name = f"master_{media_name}_{start_time}_{end_time}{media_type}"
-        cmd = ["ffmpeg", "-i", f'{media_name}{media_type}', '-ss',
+        cmd = ["ffmpeg", "-i", f'{src_file}', '-ss',
                f'{start_time}', '-t', f'{duration_time}', '-an',
                f'{media_target_dir}/{output_name}']
 
@@ -70,6 +93,8 @@ def slice_media(media_name, media_type):
         print(f'Error for run {i}: {error}')
 
 
-for filename in media_from_dir_files:
+for i in range(len(media_from_dir_filename)):
+    filename = media_from_dir_filename[i]
+    filepath = media_from_dir_path[i]
     media_type = ".mkv"
-    slice_media(filename, media_type)
+    slice_media(filepath, filename, media_type)
