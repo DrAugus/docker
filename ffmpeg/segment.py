@@ -57,8 +57,12 @@ print_list(media_from_dir_filename)
 
 duration_time = 120
 
+total_num_media = 0
+
 
 def slice_media(from_path, media_name, media_type):
+    global total_num_media
+
     src_file = f'{from_path}{media_name}{media_type}'
 
     # 视频时长
@@ -68,7 +72,9 @@ def slice_media(from_path, media_name, media_type):
     res = obj.read()
     media_len = math.ceil(float(res))
     # 向上取整秒数
-    print('视频长度为: ', media_len)
+    print('当前视频长度为: ', media_len)
+    # 计数裁剪个数
+    num_meida = 0
 
     # `-an`选项会删除视频中的音频
     # 120s 裁剪一段，每段视频重叠上一段的最后 10s
@@ -81,6 +87,11 @@ def slice_media(from_path, media_name, media_type):
                f'{media_target_dir}/{output_name}']
 
         print(cmd)
+
+        num_meida = num_meida + 1
+
+        # continue
+        
         # 执行 ffmpeg 命令
         process = subprocess.Popen(
             cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -99,9 +110,15 @@ def slice_media(from_path, media_name, media_type):
         with open('error.log', 'a') as f:
             print(output_error, file=f)
 
+    print(f'当前视频会被裁剪为[{num_meida}]个')
+    total_num_media = total_num_media + num_meida
+
 
 for i in range(len(media_from_dir_filename)):
     filename = media_from_dir_filename[i]
     filepath = media_from_dir_path[i]
     media_type = ".mkv"
     slice_media(filepath, filename, media_type)
+
+
+print(f'总视频个数为[{total_num_media}]')
